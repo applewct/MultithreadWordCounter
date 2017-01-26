@@ -6,46 +6,44 @@ import java.nio.file.Paths;
 public class NPartWordCount{
     public static void main(String args[])throws IOException{
         String fileName = args[0];
-        String partNum = args[1];
+        String partNum = args[1]; // number of thread to be used = number of partitions
 
-        // open file and split into n part
+        // open file and split into words
         String fullFile = new String(Files.readAllBytes(Paths.get(fileName)));
-        fullFile = fullFile.replaceAll("[^A-Za-z0-9\\s]","");
-        fullFile = fullFile.toLowerCase();
-        String[] fullWords = fullFile.split("\\s+");
-        List<String> fullWordList = new ArrayList<String>(Arrays.asList(fullWords));
+        fullFile = fullFile.replaceAll("[^A-Za-z0-9\\s]",""); //remove meaningless char
+        fullFile = fullFile.toLowerCase(); // convert to lowercase
+        String[] fullWords = fullFile.split("\\s+"); // split using space and newline
+        List<String> fullWordList = new ArrayList<String>(Arrays.asList(fullWords)); // convert into List
 
-
+        // split word list into n part, save into a list
         int partitionSize = (int)Math.ceil((double)fullWordList.size()/ Integer.parseInt(partNum));
         List<List<String>> partitions = new LinkedList<List<String>>();
-        for (int i = 0; i < fullWordList.size(); i += partitionSize) {
-            partitions.add(fullWordList.subList(i,
-            Math.min(i + partitionSize, fullWordList.size())));
+        for(int i=0; i<fullWordList.size(); i += partitionSize){
+            partitions.add(fullWordList.subList(i, Math.min(i + partitionSize, fullWordList.size())));
         }
 
         // create list to hold all n partitioned result
-        List< Map<String, Integer> > nWordCounts
-        = new ArrayList< Map<String, Integer> >();
+        List<Map<String, Integer>> nWordCounts = new ArrayList< Map<String, Integer> >();
 
         // calculate time
         long startTime = System.currentTimeMillis();
 
         // create n thread to calculate counts
-        ArrayList<ThreadCountOnePart> threadlist
-        = new ArrayList<ThreadCountOnePart>();
+        ArrayList<ThreadCountOnePart> threadlist = new ArrayList<ThreadCountOnePart>();
 
-        for ( int i = 0 ; i < partitions.size() ; i++ ) {
+        for(int i=0; i<partitions.size();i++){
             ThreadCountOnePart t = new ThreadCountOnePart(partitions.get(i));
             threadlist.add(t);
             t.start();
         }
 
         // get result from thread
-        for ( ThreadCountOnePart t: threadlist ) {
+        for(ThreadCountOnePart t: threadlist){
             try{
                 t.join();
-                nWordCounts.add( t.getWordCount() );
-            } catch (Exception e){}
+                nWordCounts.add(t.getWordCount());
+            }
+            catch (Exception e){}
         }
 
         // time end
@@ -55,8 +53,8 @@ public class NPartWordCount{
 
         // combine result
         Map<String, Integer> totalWCount = new HashMap<String, Integer>();
-        for ( Map<String, Integer> wcount: nWordCounts ){
-            for (Map.Entry<String, Integer> entry : wcount.entrySet()){
+        for(Map<String, Integer> wcount: nWordCounts){
+            for(Map.Entry<String, Integer> entry : wcount.entrySet()){
                 String iword = entry.getKey();
                 Integer icount = entry.getValue();
                 Integer count = totalWCount.get(iword);
@@ -65,9 +63,9 @@ public class NPartWordCount{
         }
 
         // print result
-        for ( Map.Entry<String, Integer> entry : totalWCount.entrySet()){
-            System.out.println(String.format("%30s %2s",
-            entry.getKey(), entry.getValue()));
+        System.out.println(String.format("%30s %6s", "WORD", "COUNT"));
+        for(Map.Entry<String, Integer> entry : totalWCount.entrySet()){
+            System.out.println(String.format("%30s %2s", entry.getKey(), entry.getValue()));
         }
     }
 }
@@ -86,9 +84,7 @@ class ThreadCountOnePart extends Thread{
     }
 
     public void run(){
-        for (String word: _part){
-            //System.out.println(word);
-
+        for(String word: _part){
             Integer count = _wordCount.get(word);
             _wordCount.put(word, count == null ? 1 : count + 1);
         }
