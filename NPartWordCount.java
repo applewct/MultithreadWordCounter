@@ -15,11 +15,6 @@ public class NPartWordCount{
         String[] fullWords = fullFile.split("\\s+");
         List<String> fullWordList = new ArrayList<String>(Arrays.asList(fullWords));
 
-        // test printing whole file
-        // for(String s: fullWords){
-        //     System.out.println(s);
-        // }
-
 
         int partitionSize = (int)Math.ceil((double)fullWordList.size()/ Integer.parseInt(partNum));
         List<List<String>> partitions = new LinkedList<List<String>>();
@@ -27,16 +22,6 @@ public class NPartWordCount{
             partitions.add(fullWordList.subList(i,
             Math.min(i + partitionSize, fullWordList.size())));
         }
-
-        // test printing split docs
-        // System.out.println("Original: " + fullWordList.size());
-        //
-        // for(List<String> l : partitions){
-        //     for(String s : l){
-        //         System.out.println(s);
-        //     }
-        //     System.out.println("Split: " + l.size());
-        // }
 
         // create list to hold all n partitioned result
         List< Map<String, Integer> > nWordCounts
@@ -80,7 +65,6 @@ public class NPartWordCount{
         }
 
         // print result
-        System.out.println("-- Display the total word count --");
         for ( Map.Entry<String, Integer> entry : totalWCount.entrySet()){
             System.out.println(entry.getKey() + "      " + entry.getValue());
         }
