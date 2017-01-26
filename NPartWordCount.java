@@ -66,7 +66,8 @@ public class NPartWordCount{
 
         // print result
         for ( Map.Entry<String, Integer> entry : totalWCount.entrySet()){
-            System.out.println(entry.getKey() + "      " + entry.getValue());
+            System.out.println(String.format("%30s %2s",
+            entry.getKey(), entry.getValue()));
         }
     }
 }
